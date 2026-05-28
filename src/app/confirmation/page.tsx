@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
@@ -50,22 +50,22 @@ interface Flight {
   bookings: Booking[];
 }
 
-export default function ConfirmationPage() {
+function ConfirmationContent() {
   const searchParams = useSearchParams();
   const ref = searchParams.get("ref");
   const [flight, setFlight] = useState<Flight | null>(null);
   const [booking, setBooking] = useState<Booking | null>(null);
   const [loading, setLoading] = useState(true);
 
-   useEffect(() => {
-  document.body.style.backgroundImage = "url('/confirmation.jpg')";
-  document.body.style.backgroundSize = "cover";
-  document.body.style.backgroundPosition = "center";
-  document.body.style.backgroundAttachment = "fixed";
-  document.body.style.minHeight = "100vh";
-  return () => {
-    document.body.style.backgroundImage = "";
-  };
+  useEffect(() => {
+    document.body.style.backgroundImage = "url('/confirmation.jpg')";
+    document.body.style.backgroundSize = "cover";
+    document.body.style.backgroundPosition = "center";
+    document.body.style.backgroundAttachment = "fixed";
+    document.body.style.minHeight = "100vh";
+    return () => {
+      document.body.style.backgroundImage = "";
+    };
   }, []);
 
   useEffect(() => {
@@ -106,7 +106,9 @@ export default function ConfirmationPage() {
           textAlign: "center",
         }}
       >
-        <div style={{ fontSize: 32, marginBottom: 8, color: "#fff" }}>Booking confirmed</div>
+        <div style={{ fontSize: 32, marginBottom: 8, color: "#fff" }}>
+          Booking confirmed
+        </div>
         <div style={{ fontSize: 28, fontWeight: 700, letterSpacing: 2, color: "#00FF00" }}>
           {booking.bookingRef}
         </div>
@@ -115,8 +117,15 @@ export default function ConfirmationPage() {
         </div>
       </div>
 
-      <div style={{border: "1px solid #ffffff",borderRadius: 12,padding: 24,marginBottom: 16, background: "rgba(0,0,0,0.4)"}}>
-
+      <div
+        style={{
+          border: "1px solid #ffffff",
+          borderRadius: 12,
+          padding: 24,
+          marginBottom: 16,
+          background: "rgba(0,0,0,0.4)",
+        }}
+      >
         <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>
           Flight details
         </h2>
@@ -164,7 +173,8 @@ export default function ConfirmationPage() {
           borderRadius: 12,
           padding: 24,
           marginBottom: 24,
-        }}>
+        }}
+      >
         <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>
           Passenger
         </h2>
@@ -199,9 +209,11 @@ export default function ConfirmationPage() {
             padding: "10px 24px",
             borderRadius: 8,
             textDecoration: "none",
-            fontSize: 15}}
-        >Book another flight</Link>
-
+            fontSize: 15,
+          }}
+        >
+          Book another flight
+        </Link>
         <Link
           href="/manage"
           style={{
@@ -212,8 +224,24 @@ export default function ConfirmationPage() {
             textDecoration: "none",
             fontSize: 15,
           }}
-        >Manage bookings</Link>
+        >
+          Manage bookings
+        </Link>
       </div>
     </main>
+  );
+}
+
+export default function ConfirmationPage() {
+  return (
+    <Suspense
+      fallback={
+        <main style={{ maxWidth: 720, margin: "0 auto", padding: "2rem 1rem" }}>
+          <p>Loading...</p>
+        </main>
+      }
+    >
+      <ConfirmationContent />
+    </Suspense>
   );
 }
