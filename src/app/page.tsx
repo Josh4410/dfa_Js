@@ -1,65 +1,286 @@
-import Image from "next/image";
+"use client";
+import { useEffect, useState } from "react";
+
+const AIRPORTS = [
+  { code: "NZNE", name: "Dairy Flat" },
+  { code: "YSSY", name: "Sydney" },
+  { code: "NZRO", name: "Rotorua" },
+  { code: "NZGB", name: "Great Barrier Island" },
+  { code: "NZCI", name: "Chatham Islands" },
+  { code: "NZTL", name: "Lake Tekapo" },
+];
+
+const TIMEZONES: Record<string, string> = {
+  NZNE: "Pacific/Auckland",
+  YSSY: "Australia/Sydney",
+  NZRO: "Pacific/Auckland",
+  NZGB: "Pacific/Auckland",
+  NZCI: "Pacific/Chatham",
+  NZTL: "Pacific/Auckland",
+};
+
+function formatLocal(utc: string, tz: string) {
+  return new Date(utc).toLocaleString("en-NZ", {
+    timeZone: tz,
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+interface Flight {
+  _id: string;
+  flightNumber: string;
+  origin: string;
+  destination: string;
+  departureUtc: string;
+  arrivalUtc: string;
+  aircraft: string;
+  capacity: number;
+  priceNZD: number;
+  seatsRemaining: number;
+}
 
 export default function Home() {
+  const [origin, setOrigin] = useState("NZNE");
+  const [destination, setDestination] = useState("YSSY");
+  const [date1, setDate1] = useState("");
+  const [date2, setDate2] = useState("");
+  const [flights, setFlights] = useState<Flight[]>([]);
+  const [searched, setSearched] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+  document.body.style.backgroundImage = "url('/home.jpg')";
+  document.body.style.backgroundSize = "cover";
+  document.body.style.backgroundPosition = "center";
+  document.body.style.backgroundAttachment = "fixed";
+  document.body.style.minHeight = "100vh";
+  return () => {
+    document.body.style.backgroundImage = "";
+  };
+}, []);
+
+  async function search() {
+    console.log("date1:", date1, "date2:", date2); //debug log
+    if (!date1 || !date2) {
+      alert("Please select a date range");
+      return;
+    }
+    if (origin === destination) {
+      alert("Origin and destination must differ");
+      return;
+    }
+    setLoading(true);
+    const res = await fetch(
+      `/api/schedules?orig=${origin}&dest=${destination}&date1=${date1}&date2=${date2}`
+    );
+    const data = await res.json();
+    setFlights(data);
+    setSearched(true);
+    setLoading(false);
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <main style={{ maxWidth: 720, margin: "0 auto", padding: "2rem 1rem" }}>
+      
+      <h1 style={{ fontSize: 28, fontWeight: 600, marginBottom: 4, color: "#FFF" }}>
+        Dairy Flat Air
+      </h1>
+
+      <div style={{border: "1px solid #ffffff",borderRadius: 12,padding: 24,marginBottom: 16, background: "rgba(0,0,0,0.4)"}}>
+
+        <h2 style={{ fontSize: 18, fontWeight: 500, marginBottom: 16, color: "#fff" }}>
+          Search flights
+        </h2>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 12,
+            marginBottom: 16,
+          }}
+        >
+          <div>
+            <label style={{ display: "block", fontSize: 13, marginBottom: 4, color: "#fff" }}>
+              From
+            </label>
+            <select
+              value={origin}
+              onChange={(e) => setOrigin(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "8px 12px",
+                borderRadius: 8,
+                border: "1px solid #ddd",
+                fontSize: 15,
+                color: "#111",
+              }}
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              {AIRPORTS.map((a) => (
+                <option key={a.code} value={a.code}>
+                  {a.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label style={{ display: "block", fontSize: 13, marginBottom: 4, color: "#fff" }}>
+              To
+            </label>
+            <select
+              value={destination}
+              onChange={(e) => setDestination(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "8px 12px",
+                borderRadius: 8,
+                border: "1px solid #ddd",
+                fontSize: 15,
+                color: "#111",
+              }}
             >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+              {AIRPORTS.map((a) => (
+                <option key={a.code} value={a.code}>
+                  {a.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label style={{ display: "block", fontSize: 13, marginBottom: 4, color: "#fff" }}>
+              From date
+            </label>
+            <input
+              type="date"
+              value={date1}
+              onChange={(e) => setDate1(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "8px 12px",
+                borderRadius: 8,
+                border: "1px solid #ddd",
+                fontSize: 15,
+                color: "#111",
+              }}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </div>
+
+          <div>
+            <label style={{ display: "block", fontSize: 13, marginBottom: 4, color: "#fff" }}>
+              To date
+            </label>
+            <input
+              type="date"
+              value={date2}
+              onChange={(e) => setDate2(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "8px 12px",
+                borderRadius: 8,
+                border: "1px solid #ddd",
+                fontSize: 15,
+                color: "#111",
+              }}
+            />
+          </div>
         </div>
-      </main>
-    </div>
+
+        <button
+          onClick={search}
+          disabled={loading}
+          style={{
+            background: "#000000",
+            color: "#00FF00",
+            border: "none",
+            borderRadius: 8,
+            padding: "10px 24px",
+            fontSize: 15,
+            cursor: loading ? "not-allowed" : "pointer",
+            opacity: loading ? 0.6 : 1,
+          }}
+        >
+          {loading ? "Searching..." : "Search"}
+        </button>
+      </div>
+
+      {searched && flights.length === 0 && (
+        <p style={{ color: "#fff" }}>
+          No flights found for that route and date range.
+        </p>
+      )}
+
+      {flights.map((f) => (
+        <div
+          key={f._id}
+          style={{
+            border: "1px solid #ffffff",
+            borderRadius: 12,
+            padding: 24,
+            marginBottom: 10,
+            background: "rgba(0,0,0,0.4)",
+          }}
+          >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+            }}
+          >
+            <div>
+              <div
+                style={{ fontWeight: 600, fontSize: 16, marginBottom: 4, color: "#fff" }}
+              >
+                {f.flightNumber} -{" "}
+                {AIRPORTS.find((a) => a.code === f.origin)?.name} to {" "}
+                {AIRPORTS.find((a) => a.code === f.destination)?.name}
+              </div>
+              <div style={{ fontSize: 14, color: "#fff", marginBottom: 2 }}>
+                Dep: {formatLocal(f.departureUtc, TIMEZONES[f.origin])}
+              </div>
+              <div style={{ fontSize: 14, color: "#fff", marginBottom: 2 }}>
+                Arr: {formatLocal(f.arrivalUtc, TIMEZONES[f.destination])}
+              </div>
+              <div style={{ fontSize: 13, color: "#fff", marginTop: 4 }}>
+                {f.aircraft} - {f.seatsRemaining} of {f.capacity} seats
+                remaining
+              </div>
+            </div>
+
+            <div style={{ textAlign: "right" }}>
+              <div
+                style={{ fontSize: 22, fontWeight: 700, marginBottom: 8, color: "#F54927" }}
+              >
+                NZ${f.priceNZD}
+              </div>
+              {f.seatsRemaining > 0 ? (
+                <a href={`/book/${f._id}`}
+                  style={{
+                    background: "#111",
+                    color: "#00FF00",
+                    padding: "8px 18px",
+                    borderRadius: 8,
+                    textDecoration: "none",
+                    fontSize: 14,
+                    display: "inline-block",
+                  }}
+                >
+                  Book
+                </a>
+              ) : (
+                <span style={{ color: "#c00", fontSize: 14 }}>Full</span>
+              )}
+            </div>
+          </div>
+        </div>
+      ))}
+    </main>
   );
 }
