@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Dairy Flat Air: Flight Booking
 
-## Getting Started
+**Live:** https://dfa-js.vercel.app/
 
-First, run the development server:
+A booking system for a fictitious light-jet airline based at Dairy Flat Airport (NZNE), built for 159.352 Advanced Web Development at Massey University (Assignment 2, 2026).
 
-```bash
+Built with Next.js (App Router), MongoDB Atlas and Vercel.
+
+## Features
+
+- Search flights between two airports across a date range, since some routes only fly once or twice a week
+- Book a seat, get a unique booking reference (`DF-XXXXXX`) and an invoice page with the price and local departure and arrival times
+- Look up all bookings for an email address and cancel them
+- Full flights can't be booked
+- Rolling weekly timetable loaded for 10 weeks of real calendar dates
+- Times shown in each airport's own timezone: NZ (+12), Chatham Islands (+12:45), Sydney (+10)
+
+## Routes
+
+All routes go to and from Dairy Flat (NZNE): Sydney (YSSY), Rotorua (NZRO), Great Barrier Island (NZGB), Chatham Islands (NZCI) and Lake Tekapo (NZTL).
+
+## API
+
+| Method | Route | Purpose |
+| --- | --- | --- |
+| GET | `/api/schedules?orig&dest&date1&date2` | Search flights, with seats remaining |
+| GET | `/api/flights/[id]` | One scheduled flight |
+| POST | `/api/bookings` | Create a booking |
+| GET / DELETE | `/api/bookings/[ref]` | View or cancel a booking |
+| GET | `/api/passengers/[email]/bookings` | All bookings for a passenger |
+
+## Run locally
+
+```sh
+npm install
+# .env.local: MONGODB_URI=<your Atlas connection string>
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Known issues
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+From marking feedback, tracked in Issues:
+- [#1](../../issues/1) The search accepts routes the airline doesn't fly, e.g. Sydney to Chatham Islands
+- [#2](../../issues/2) Confirmation page text is black on black under a light OS theme
